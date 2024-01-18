@@ -1,13 +1,13 @@
 import os
 import json
-import  re
+import re
 import sys
 import keyboard
+
 # чтение файла
 line_num2 = 0 
 line_num = 0
 if_obr = True
-#file_batch = "test.b++"
 file_batch = sys.argv[1]
 if_com = 0
 value = []
@@ -15,11 +15,10 @@ value = []
 def command_obr(Str):
     global line, value, line_num, file_batch, if_obr
     command = Str.split()
-    if command[0] == "pause>nul":
-        keyboard.read_event()
-
-    if command[0] == "pause":
-        print("Для продолжения нажмите любую клавишу...")
+    
+    if command[0].startswith("pause"):
+        if not command[0].endswith(">nul"):
+            print("Для продолжения нажмите любую клавишу...")
         keyboard.read_event()
 
     if command[0] == "sys":
@@ -35,11 +34,9 @@ def command_obr(Str):
             for idx, line in enumerate(lines):
                 if line.startswith(":"):
                     label_name = line.strip()  # Получаем название метки
-                    #print(f"Метка '{label_name}' найдена на строке {idx + 1}")
                     if label_name == command[1]:
                         line_num = idx
-                            
-    #input 
+             
     if command[0] == "input":
         index = command.index("=")
         words_after = command[index + 1:]
@@ -47,8 +44,7 @@ def command_obr(Str):
         inp = input(result)
         set_valuse = f"set {command[1]} {inp}"
         command_obr(set_valuse)
-
-    #set
+        
     if command[0] == "set":
         if command[1] == "/p":
             index = command.index("=")
@@ -63,7 +59,6 @@ def command_obr(Str):
             found = False  # Флаг для отслеживания наличия совпадений
 
             for index, json in enumerate(temp):
-                #print(f"Index: {index}, Fruit: {json}")
                 if set_value["name"] == json['name']:
                     temp[index] = set_value
                     found = True  # Устанавливаем флаг, если найдено совпадение
@@ -85,7 +80,6 @@ def command_obr(Str):
             found = False  # Флаг для отслеживания наличия совпадений
 
             for index, json in enumerate(temp):
-                #print(f"Index: {index}, Fruit: {json}")
                 if set_value["name"] == json['name']:
                     temp[index] = set_value
                     found = True  # Устанавливаем флаг, если найдено совпадение
@@ -96,36 +90,15 @@ def command_obr(Str):
 
             value = temp  # Присваиваем обновленное значение переменной value
 
-            #print(f"{value} : {temp} : {set_value['name']} : {set_value['name']}")
-
     if command[0] == "exit":
         sys.exit()
 
-    #if
     if command[0] == "if":
-        if command[2] == "==":
-            if command[1] == command[3]:
-                #index = command.index("to")
-                #words_after = command[index + 1:]
-                #result = ' '.join(words_after)
-                #print(result)
-                #command_obr(result)
-                pass
-            else:
-                if_obr = False
-        else:
-            if command[2] == "!=":
-                if command[1] != command[3]:
-                    #index = command.index("to")
-                    #words_after = command[index + 1:]
-                    #result = ' '.join(words_after)
-                    #print(result)
-                    #command_obr(result)
-                    pass
-                else:
-                    if_obr = False
+        if command[2] == "==" and command[1] != command[3]:
+            if_obr = False
+        if command[2] == "!=" and command[1] == command[3]:
+            if_obr = False
 
-    #echo
     if command[0] == "echo":
         index = command.index("echo")
         words_after = command[index + 1:]
@@ -141,7 +114,7 @@ while True:
                 var_name = "%%" + var["name"]
                 if var_name in line:
                     line = line.replace(var_name, var["value"])
-            #print(f"Обработка строки {line_num + 1}: {line}")
+            
             if line == ")":
                 if_obr = True
             if if_obr == True:
